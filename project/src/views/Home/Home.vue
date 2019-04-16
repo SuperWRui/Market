@@ -19,7 +19,7 @@
                 <!-- 中 -->
                 <el-main>
                     <!-- 路由出口 -->
-                    <router-view></router-view>
+                    <router-view @A="B"></router-view>
                 </el-main>
                 <!-- 尾 -->
                 <el-footer>

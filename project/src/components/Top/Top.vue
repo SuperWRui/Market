@@ -14,14 +14,14 @@
             <el-col :span="8">
                   <!-- 头像 -->
                   <div class="avatar">
-                    <img width="100%" height="100%" src="./avatar.jpg" alt="">
+                    <img width="100%" height="100%"  :src="imgUrl" alt="">
                   </div>
             </el-col>
             <el-col :span="16">
                  <!-- 登录账号名 -->
-                        <el-dropdown>
+                        <el-dropdown @command="handleCommand">
                             <span class="el-dropdown-link">
-                                美少女<i class="el-icon-arrow-down el-icon--right"></i>
+                                {{ account }}<i class="el-icon-arrow-down el-icon--right"></i>
                             </span>
                             <el-dropdown-menu slot="dropdown">
                                 <el-dropdown-item command="a">个人中心</el-dropdown-item>
@@ -37,8 +37,55 @@
 </template>
 
 <script>
-export default {
+// 引入local
+import local from '@/utils/local'
 
+export default {
+   data(){
+       return{
+           account:'',
+           imgUrl: ''
+       }
+   },
+   methods:{
+    handleCommand(command){
+    if(command==='a'){
+       this.$router.push('/home/personal')
+        
+    }else if(command==='b'){
+        local.remove('rrrrr--r666');
+        //推出提示
+        this.$message({
+            type:'success',
+            message:"退出成功，欢迎下次来，小东西~"
+        })
+        setTimeout(()=>{
+        //跳到登录页面
+        this.$router.push('/login')
+        },1000)
+    }
+    },
+   
+  // 获取当前登录账号
+        getUserInfo() {
+            this.request.get('/account/accountinfo')
+                .then(res => {
+                    // 接收后端响应的数据
+                    let {account, img_url} = res[0];
+                    // 赋值给对应的变量
+                    this.account = account;
+                    this.imgUrl = `http://127.0.0.1:3300/${img_url}`;
+                })
+                .catch(err => {
+                    console.log(err)
+                })
+        }
+    
+   },
+   created(){
+       //调用函数 
+         this.getUserInfo();
+   }
 }
 </script>
 

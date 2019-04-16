@@ -7,24 +7,24 @@
 
      <div class="text item">
       <el-form 
-              :model="pwdmodifyForm" 
+              :model="passwordMidifyForm" 
               status-icon 
               :rules="rules" 
-              ref="pwdmodifyForm" 
+              ref="passwordMidifyForm" 
               label-width="100px" 
               class="demo-ruleForm"
               >
-              <el-form-item label="原密码" prop="password">
-                <el-input type="text" v-model="pwdmodifyForm.pass" autocomplete="off"></el-input>
+              <el-form-item label="原密码" prop="oldPassword">
+                <el-input type="text" v-model="passwordMidifyForm.oldPassword" autocomplete="off"></el-input>
               </el-form-item>
-              <el-form-item label="新密码" prop="checkPass">
-                <el-input type="password" v-model="pwdmodifyForm.checkPass" autocomplete="off"></el-input>
+              <el-form-item label="新密码" prop="newPassword">
+                <el-input type="password" v-model="passwordMidifyForm.newPassword" autocomplete="off"></el-input>
               </el-form-item>
-              <el-form-item label="确认密码" prop="checkPass2">
-                <el-input type="password" v-model="pwdmodifyForm.checkPass2" autocomplete="off"></el-input>
+              <el-form-item label="确认密码" prop="checkNewPassword">
+                <el-input type="password" v-model="passwordMidifyForm.checkNewPassword" autocomplete="off"></el-input>
               </el-form-item>
               <el-form-item>
-                <el-button type="primary" @click="submitForm('')">修改</el-button>
+                <el-button type="primary" @click="submitForm()">修改</el-button>
               </el-form-item>
       </el-form>
      </div>
@@ -36,21 +36,33 @@
 </template>
 <script>
 import { passwordReg } from '@/utils/validator';
+import local from '@/utils/local'
 export default {
     data(){
-      const confirmPassword = (rule, value, callback) => {
-        if (value === "") {
-        callback(new Error("确认密码不能为空"));
-      } else if (value !== this.pwdmodifyForm.password) {
-        callback(new Error("两次密码不一致"));
-      } else {
-        callback(); //成功
-      }
-    }
 
-    // 密码的自定义验证函数
-    const checkPassword = (rule, value, callback) => {
-      if (value === "") {
+    //验证旧密码
+    const validatorOldPassword=(rule,value,callback)=>{
+           this.request.post('/account/passwordmodify',{oldPassword:value})
+           .then(res=>{
+             let {code, reason}=res;
+          if(code===0){
+            callback()
+          }else if(code===1){
+            callback(new Error(reason))
+          }
+           })
+           .catch(err=>{
+             console.log(err);
+             
+           })
+       }
+
+
+     
+
+    // 验证新密码
+    const validatorNewPassword = (rule, value, callback) => {
+      if (value === '') {
         // 非空验证
         callback(new Error("新密码不能为空")); // 错误提示
       } else if (!passwordReg(value)) {
@@ -58,36 +70,77 @@ export default {
           new Error("以字母开头，长度在3~6之间，只能包含字符、数字和下划线")
         ) // 错误提示
       } else {
-        if (this.pwdmodifyForm.checkPass !== "") {
+        if (this.passwordMidifyForm.checkNewPassword !== '') {
           // 如果确认密码不为空
           // 触发一致性验证
-          this.$refs.pwdmodifyForm.validateField("checkPass");
+          this.$refs.passwordMidifyForm.validateField('checkNewPassword')
         }
         callback(); // 成功回调
       }
     }
+
+    // 验证确认新密码
+        const validatorCheckNewPassword = (rule, value, callback) => {
+            if (value === '') {
+                callback(new Error('请输入确认新密码'))
+            } else if (value !== this.passwordMidifyForm.newPassword) {
+                callback(new Error('两次密码不一致'))
+            } else {
+                callback()
+            }
+        }
       return{
-      pwdmodifyForm:{
-        password:'',
-        checkPass:'',
-        checkPass2:''
+       passwordMidifyForm:{
+        oldPassword:'',
+        newPassword:'',
+        checkNewPassword:''
       },
        rules:{
-
-            //原密码
-           /*  password:[
-                {required:true,validator:password,trigger:'blur'},
-            ], */
-            //确认密码
-            checkPass:[
-                {required:true,validator:checkPassword,trigger:'blur'},
-            ],
-            //确认密码
-            checkPass2:[
-                {required:true,validator:confirmPassword,trigger:'blur'},
-            ]
-        }
+                oldPassword: [
+                    {required:true, validator: validatorOldPassword, trigger: 'blur'}
+                ],
+                newPassword: [
+                    {required: true, validator: validatorNewPassword, trigger: 'blur'}
+                ],
+                checkNewPassword: [
+                    {required: true, validator: validatorCheckNewPassword, trigger: 'blur'}
+                ]
+            }
       }
+    },
+    methods:{
+       submitForm(){
+         this.$refs.passwordMidifyForm.validate(valid=>{
+           if(valid){
+             //收集新密码
+             let params={
+               newPassword:this.passwordMidifyForm.newPassword
+             }
+             //发送请求给后端
+             this.request.post('/account/savenewpassword',params)
+             .then(res=>{
+               //接收数据
+               let {code , reason}=res;
+               //判断
+               if(code===0){
+                 this.$message({
+                   type:'success',
+                   message:reason
+                 })
+                 //删除token
+                 local.remove('rrrrr--r666')
+                 //跳转到登录页面
+                 this.$router.push('/login')
+               }
+
+             })
+             .catch(err=>{
+               console.log(err);
+               
+             })
+           }
+         })
+       }
     }
 }
 </script>

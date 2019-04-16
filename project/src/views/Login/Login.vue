@@ -33,6 +33,8 @@
 <script>
 /*  import {passwordReg} from '@/utils/validator'; */
 import { passwordReg } from "@/utils/validator";
+// 引入 local 文件
+import local from '@/utils/local'
 export default {
   data() {
 
@@ -103,8 +105,31 @@ export default {
             account: this.loginForm.account,
             password: this.loginForm.password
           };
-          alert("登录成功");
-          this.$router.push("/home");
+           this.request.post('/login/checklogin',params)
+            .then(res => {
+                            // 接收参数
+                            let {code, reason, token} = res;
+                            // 判断
+                            if (code === 0) { // 成功
+                                // 把token存入浏览器
+                                local.save('rrrrr--r666', token)
+
+                                // 弹成功提示
+                                this.$message({
+                                    type: 'success',
+                                    message: reason
+                                })
+                                // 跳后端首页
+                                this.$router.push('/home')
+
+                            } else if (code === 1) { // 失败
+                                this.$message.error(reason)
+                            }
+                        })
+           .catch(err=>{
+             console.log(err);
+             
+           })
         } else {
           console.log("前端验证未通过！");
           return;

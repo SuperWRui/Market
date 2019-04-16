@@ -1,80 +1,66 @@
 <template>
     <div class="left-nav">
-          <!-- 导航组件 -->
-          <el-menu
+        <!-- 导航组件 -->
+         <el-menu
             :default-active="$route.path"
             class="el-menu-vertical-demo"
             background-color="rgb(48, 65, 86)"
             text-color="#fff"
-            active-text-color="rgb(52, 142, 226)"
+            active-text-color="rgb(64, 158, 255)"
             unique-opened
             router
             >
-             <!-- 导航-->
-            <el-submenu :index="(index+1)+''" v-for="(menu,index) in menus" :key="index">
+            <!-- 导航 -->
+            <el-submenu :index="(index + 1) + ''" v-for="(menu, index) in menus" :key="index">
                 <!-- 图标和标题 -->
                 <template slot="title">
                     <i :class="menu.iconClass"></i>
-                    <span>{{menu.title}}</span>
+                    <span>{{ menu.title }}</span>
                 </template>
                 <!-- 二级导航 -->
                 <el-menu-item 
-                :index="subMenu.path"
-                 v-for="(subMenu,index) in menu.children" 
-                 :key="index"
-                 >
-                {{subMenu.subTitle}}
-                 </el-menu-item>
+                    v-for="(subMenu, index) in menu.children"
+                    :index="subMenu.path"
+                    :key="index"
+                    >
+                    {{ subMenu.subTitle }}
+                </el-menu-item>
             </el-submenu>
-
-           
 
         </el-menu>
     </div>
 </template>
 <script>
 export default {
-    data(){
-        return{
-            "menus":[
-                {
-                iconClass:'el-icon-document',
-                title:'系统管理',
-                children:[
-                    {path:'/home/systeminfo',subTitle:"系统信息"}
-                ]
-               },
-                {
-                iconClass:'el-icon-news',
-                title:'账号管理',
-                children:[
-                            {path:'/home/accountmanage',subTitle:"账号管理"},
-                            {path:'/home/accountadd',subTitle:"添加账号"},
-                            {path:'/home/passwordmodify',subTitle:"密码修改"}
-                    ]
-               }, {
-                iconClass:'el-icon-goods',
-                title:'商品管理',
-                children:[
-                    {path:'/home/goodsmanage',subTitle:"商品管理"},
-                     {path:'/home/goodsadd',subTitle:"添加商品"}
-                ]
-               }, {
-                iconClass:'el-icon-edit-outline',
-                title:'统计管理',
-                children:[
-                     {path:'/home/salestotal',subTitle:"销售统计"},
-                    {path:'/home/stocktotal',subTitle:"进货统计"}
-                ]
-               },
-        ]
+    data () {
+        return {
+            // 导航菜单数据
+            menus: []
         }
-        
+    },
+    methods: {
+        getMenus() {
+            this.request.get('/account/menus')
+             .then(res => {
+                // 接收后端响应的菜单
+                this.menus = res.accessMenu;
+            
+               
+             })
+             .catch(err => {
+                 console.log(err)
+             })
+        }
+    },
+    created() {
+        // 调用请求 请求菜单数据
+        this.getMenus();
     }
 }
 </script>
 <style lang="less">
-@import './leftnav.less';
+    // 引入样式
+    @import './leftnav.less';
 </style>
 
 

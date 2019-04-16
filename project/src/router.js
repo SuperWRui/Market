@@ -18,7 +18,7 @@ export default new Router({
     //后台主界面
     {
       path:'/home',
-      // redirect: '/home/systeminfo',
+      redirect: '/home/systeminfo',
       component:()=>import('./views/Home/Home.vue'),
       children:[
          // 系统信息
@@ -26,6 +26,12 @@ export default new Router({
           path:'/home/systeminfo',
           component:()=>import('./views/SystemInfo/SystemInfo.vue')
         }, 
+
+        // 个人中心
+        {
+          path: '/home/personal',
+          component: () => import('./views/Personal/Personal.vue'),
+        },
         //账号添加
          {
           path:'/home/accountadd',
@@ -61,6 +67,7 @@ export default new Router({
           path:'/home/stocktotal',
           component:()=>import('./views/StockTotal/StockTotal.vue')
         },
+
       ]
 
 

@@ -4,8 +4,15 @@ import axios from 'axios'
 //引入qs
 import qs from 'qs'
 
+import local from '@/utils/local'
 axios.defaults.baseURL='http://127.0.0.1:3300';
-
+// axios请求拦截器
+axios.interceptors.request.use(config => {
+    // 获取token
+    const token = local.get('rrrrr--r666');
+    config.headers.authorization = `Bearer ${token}` 
+    return config;
+})
 //导出请求对象
 export default {
     get (url,params={}){
